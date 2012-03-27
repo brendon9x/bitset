@@ -283,6 +283,26 @@ static VALUE rb_bitset_from_s(VALUE self, VALUE s) {
     return Data_Wrap_Struct(cBitset, 0, bitset_free, new_bs);
 }
 
+static VALUE rb_bitset_from_str(VALUE self, VALUE s) {
+  int length = RSTRING_LEN(s);
+  char* data = StringValuePtr(s);
+
+  Bitset * new_bs = bitset_new();
+  bitset_setup(new_bs, length*8);
+  int i, j;
+  for (i=0; i < length; ++i) {
+      int filter = 0xc0;
+      for(j=0; j < 8; ++j) {
+          if(data[i] & filter) {
+              set_bit(new_bs, i*8+j);
+          }
+          filter = filter >> 1;
+      }
+  }
+
+  return Data_Wrap_Struct(cBitset, 0, bitset_free, new_bs);
+}
+
 static VALUE rb_bitset_hamming(VALUE self, VALUE other) {
     Bitset * bs = get_bitset(self);
     Bitset * other_bs = get_bitset(other);
@@ -389,6 +409,7 @@ void Init_bitset() {
     rb_define_method(cBitset, "each", rb_bitset_each, 0);
     rb_define_method(cBitset, "to_s", rb_bitset_to_s, 0);
     rb_define_singleton_method(cBitset, "from_s", rb_bitset_from_s, 1);
+    rb_define_singleton_method(cBitset, "from_str", rb_bitset_from_str, 1);
     rb_define_method(cBitset, "marshal_dump", rb_bitset_marshall_dump, 0);
     rb_define_method(cBitset, "marshal_load", rb_bitset_marshall_load, 1);
     rb_define_method(cBitset, "to_a", rb_bitset_to_a, 0);

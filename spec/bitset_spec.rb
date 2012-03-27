@@ -259,6 +259,13 @@ describe Bitset do
     end
   end
 
+  describe :from_str do
+    it 'correctly creates a bitmap from a string' do
+      bs = Bitset.from_str("\xC0")
+      bs.set?(0,1).should == true
+    end
+  end
+
   describe :marshalling do
     it 'can marshal and load' do
       bs = Bitset.new(68)
